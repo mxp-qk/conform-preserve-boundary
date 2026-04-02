@@ -1,43 +1,53 @@
-import { useForm, PreserveBoundary, useFormData } from '@conform-to/react/future';
-import { parseWithZod } from '@conform-to/zod/v4';
-import { coerceFormValue } from '@conform-to/zod/v4/future';
-import { useState } from 'react';
-import z from 'zod';
+import {
+  useForm,
+  PreserveBoundary,
+  useFormData,
+} from "@conform-to/react/future";
+import { parseWithZod } from "@conform-to/zod/v4";
+import { coerceFormValue } from "@conform-to/zod/v4/future";
+import { useState } from "react";
+import z from "zod";
 
-const schema = coerceFormValue (z.object({
-  name: z.string(),
-  email: z.string(),
-  address: z.string(),
-  city: z.string(),
-  
-}))
+const schema = coerceFormValue(
+  z.object({
+    name: z.string(),
+    email: z.string(),
+    address: z.string(),
+    city: z.string(),
+  }),
+);
 
 function App() {
   const [step, setStep] = useState(1);
-  const { form, fields } = useForm(schema,{
-    defaultValue:{
+  const { form, fields } = useForm(schema, {
+    defaultValue: {
       name: "John Doe",
       email: "john.doe@mail.com",
       address: "123 Main St",
       city: "Anytown",
-      
     },
-    onSubmit: (e,ctx) => {
+    onSubmit: (e, ctx) => {
       e.preventDefault();
-      console.log("Submitted value",ctx.value);
-    }
+      console.log("Submitted value", ctx.value);
+    },
   });
 
-  useFormData(form.id,(formData) => {
-    const submission = parseWithZod(formData,{schema});
+  useFormData(form.id, (formData) => {
+    const submission = parseWithZod(formData, { schema });
 
-    if(submission.status === "success"){
+    if (submission.status === "success") {
       console.log("Valid submission", submission.value);
       return submission.value;
     }
 
-    console.error("Validation errors", submission.error);
-  })
+    console.error("Validation errors", {
+      error: submission.error,
+      nameCount: formData.getAll("name").length,
+      emailCount: formData.getAll("email").length,
+      addressCount: formData.getAll("address").length,
+      cityCount: formData.getAll("city").length,
+    });
+  });
 
   return (
     <form {...form.props}>
@@ -88,11 +98,11 @@ function App() {
             Next
           </button>
         ) : step === 2 ? (
-          <button  type="submit">Submit</button>
+          <button type="submit">Submit</button>
         ) : null}
       </div>
     </form>
   );
 }
 
-export default App
+export default App;
