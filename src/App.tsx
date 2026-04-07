@@ -32,12 +32,16 @@ function App() {
     },
   });
 
-  useFormData(form.id, (formData) => {
+  const submission = useFormData(form.id, (formData) => {
     const submission = parseWithZod(formData, { schema });
 
     if (submission.status === "success") {
       console.log("Valid submission", submission.value);
-      return submission.value;
+      return {
+        status: "success",
+        value: submission.value,
+        error: null,
+      };
     }
 
     console.error("Validation errors", {
@@ -47,6 +51,12 @@ function App() {
       addressCount: formData.getAll("address").length,
       cityCount: formData.getAll("city").length,
     });
+
+    return {
+      status: "error",
+      value: null,
+      error: submission.error,
+    };
   });
 
   return (
@@ -101,6 +111,7 @@ function App() {
           <button type="submit">Submit</button>
         ) : null}
       </div>
+      <pre><code>{JSON.stringify(submission,null,2)}</code></pre>
     </form>
   );
 }
